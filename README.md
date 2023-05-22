@@ -4,7 +4,10 @@
 
 The project aimed to: 
 
-Create an app able to indicate a final user if she will experience a high noise level at any specific time within a range of 48 hours. For doing so, several specific stages were accomplished: 
+Create an app able to indicate a final user if she will experience a high noise level at any specific time within a range of 48 hours. 
+
+
+For doing so, several specific stages were accomplished: 
 
 1. Getting the data bla bla bla bla 
 2. Preprocessing data bla bla bla 
