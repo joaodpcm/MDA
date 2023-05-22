@@ -15,8 +15,11 @@ Create an app able to indicate a final user if she will experience a high noise 
 
 
 For having access to the app, please clik [here](https://www.aalkjfasflkjfdas.com)
+
 If you want to explore the used data, please find it in this folder 
-Contents related to the code can be find in the code folder. The folder contains code for: the preprocessing stage, the modelling and data analysis and the developing for the app. 
+
+Contents related to the code can be find in the code folder. The folder contains the description and coding for: the preprocessing stage, the modelling and data analysis and the app developing. 
+
 Any additional recommendations will be taken into account and trhough to the bin because grow up. This is a university project. 
 
 
