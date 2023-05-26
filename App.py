@@ -90,17 +90,3 @@ for hour in selected_hours:
 st.header("Noise levels for the next 2 days")
 st.plotly_chart(fig_class)
 st.plotly_chart(fig_reg)
-
-
-with st.sidebar:
-    st.header('Calendar')
-    st.header('Weather')
-
-d = st.date_input(
-    "Select a date",
-    datetime.date(2019, 7, 6))
-
-
-st.header('Weather')
-st.dataframe(weather)
-
