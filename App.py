@@ -10,126 +10,87 @@ import seaborn as sns
 import plotly.graph_objects as go
 import missingno as msno
 import matplotlib.pyplot as plt
-import os
+import pickle
+import requests
+from datetime import datetime
+from datetime import timedelta
 import sklearn
+import plotly.graph_objects as go
 
-#weather web scraping
-driver = webdriver.Chrome("~/Downloads/chromedriver")
-driver.get("https://weather.com/weather/hourbyhour/l/c097b546627cdff2da1e276cb9b2731055718a5e7270d777a92857a9701c7870")
-content = driver.page_source
-soup = BeautifulSoup(content)
-temp_val = soup.findAll('span', attrs={'class':'DetailsSummary--tempValue--jEiXE'})
-hour = soup.findAll('h3', attrs={'class':'DetailsSummary--daypartName--kbngc'})
-wind = soup.findAll('span', attrs={'class':'Wind--windWrapper--3Ly7c DetailsTable--value--2YD0-'})
+#importing models
+with open('classifier_trained_model.pkl', 'rb') as f:
+    rfc = pickle.load(f)
 
-
-print( temp_val[0].text[:-1] , hour[0].text , wind[0].text)
+with open('regressor_trained_model.pkl', 'rb') as f:
+    hgr = pickle.load(f)
 
 
+#loading unseen data
+content = "https://weather.com/weather/hourbyhour/l/c097b546627cdff2da1e276cb9b2731055718a5e7270d777a92857a9701c7870"
+response = requests.get(content)
+soup = BeautifulSoup(response.content, 'html.parser')
 
-#loading datasets and merging
-df_meteo = pd.read_csv('meteo_data/data_final_meteo.csv')
-df_noise = pd.read_csv('noise_data/noise_data_complete')
-df_noise = df_noise.rename(columns={"result_timestamp": "DATEUTC", "comp": "target"})
-df = df_meteo.merge(df_noise, how='inner', on='DATEUTC')
-df['DATEUTC'] = pd.to_datetime(df['DATEUTC'])
-df['nameday'] = df['DATEUTC'].dt.dayofweek
+temp_val = soup.findAll('div', attrs={'class':'DetailsTable--field--CPpc_'})
 
 
-# Splitting Data
-# Extracting correct features
-from sklearn.model_selection import train_test_split
-x = df[['LC_TEMP_QCL3', 'LC_HUMIDITY', 'LC_WINDSPEED', 'LC_RAININ',
-       'LC_DAILYRAIN', 'nameday']]
-  
-y = df['target']
-
-# Splitting data into train data and validation data 
-X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=42)
-
-#Random Forest
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.exceptions import NotFittedError
-from sklearn.inspection import permutation_importance
+forecast = pd.DataFrame()
+forecast['temp'] = [round((int(temp_val[i].text[-3:-1])-32 ) *5/9, 1) for i in list(np.array(range(288))) if i%6 == 0]
+forecast['wind'] = [float(temp_val[i].text.split(' ')[1]) for i in list(np.array(range(288))) if i%6 == 1]
+forecast['wind_direction'] = [temp_val[i].text.split(' ')[0] for i in list(np.array(range(288))) if i%6 == 1]
+forecast['humidity'] = [int(temp_val[i].text[-3:-1]) for i in list(np.array(range(288))) if i%6 == 2]
+forecast['cloud_cover'] = [int(temp_val[i].text.replace('Cloud Cover', '')[:-1]) for i in list(np.array(range(288))) if i%6 == 4]
+forecast['rain'] = [int(temp_val[i].text.replace('Rain Amount', '').replace(' in', '')) for i in list(np.array(range(288))) if i%6 == 5]
+weekday = [(datetime.now()+timedelta(hours=i)).weekday() for i in range(48)]
+hour_of_day = [(datetime.now()+timedelta(hours=i)).hour for i in range(48)]
+forecast['nameday'] = weekday
+forecast['hour'] = hour_of_day
+forecast['event_yes'] = False # This value has to be included by the user. So edit this. The value now is missing, but the model running, so even if nothing is provided, it will run
+forecast['tag_category'] = 'No event' # This value has to be included by the user. So edit this
 
 
-# Define numeric and categorical features
-numeric_features = ['LC_TEMP_QCL3', 'LC_HUMIDITY', 'LC_WINDSPEED', 'LC_RAININ',
-       'LC_DAILYRAIN',]
-categorical_features = ['nameday']
 
-# Define transformers for numeric and categorical features
-numeric_transformer = Pipeline(steps=[
-    ('scaler', StandardScaler())
-])
+#making prediction on unseen data
+prediction_reg = hgr.predict(forecast)
 
-categorical_transformer = Pipeline(steps=[
-    ('onehot', OneHotEncoder(handle_unknown='ignore'))
-])
+prediction_class = rfc.predict(forecast)
 
-# Create preprocessor for numeric and categorical features
-preprocessor = ColumnTransformer(
-    transformers=[
-        ('num', numeric_transformer, numeric_features),
-        ('cat', categorical_transformer, categorical_features)
-    ])
-
-# Create pipeline with preprocessor and random forest regressor
-rfc = Pipeline(steps=[
-    ('preprocessor', preprocessor),
-    ('regressor', RandomForestClassifier(n_estimators=300, random_state=42))
-])
-
-# Fit the pipeline on the training data
-rfc.fit(X_train, y_train)
-
-# Make predictions on the test data
-y_pred_rfc = rfc.predict(X_test)
-
-# Fit the OneHotEncoder transformer to the categorical features
-categorical_transformer.fit(X_train[categorical_features])
-
-# Get feature importances and names
-importances = rfc.named_steps['regressor'].feature_importances_
-encoded_cat_features = categorical_transformer.named_steps['onehot'].get_feature_names_out(categorical_features)
-all_feature_names = numeric_features + list(encoded_cat_features)
-feature_importances = np.zeros(len(all_feature_names))
-
-# Add the importances of the original numeric features
-feature_importances[:len(numeric_features)] += importances[:len(numeric_features)]
-
-# Combine the importances of the encoded categorical features into the original features
-feature_importances = importances[:len(numeric_features)].tolist()  # Start with the numeric features
-for i, feature_name in enumerate(categorical_features):
-    encoded_cat_importances = [
-        importances[j] for j, feat_name in enumerate(all_feature_names)
-        if feat_name.startswith(feature_name + '_')
-    ]
-    feature_importances.append(sum(encoded_cat_importances))
-
-# Get the names of the original features
-original_feature_names = numeric_features + categorical_features
+#making a graph for the classifier
+colors = {"Low": "green", "Intermediate": "yellow", "High": "red"}
+category_order = ["Low", "Intermediate", "High"]
+fig_class = go.Figure(data=[go.Bar(x=forecast['hour'],
+                            y=prediction_class,
+                            marker=dict(color=[colors[level] for level in prediction_class]),
+                            customdata=prediction_class,
+                            hovertemplate="Hour: %{x}<br>Noise Level: %{customdata}<extra></extra>")])
+fig_class.update_xaxes(title_text="Hours")
+fig_class.update_yaxes(title_text="Noise Level", categoryorder="array", categoryarray=category_order)
+fig_class.update_layout(title_text="Noise Levels in the Next 48 Hours")
 
 
-# The online data is named unseen
-unseen = [temp_val[0].text[:-1], hour[0].text, wind[0].text]
+#making a graph for the regressor
+fig_reg = go.Figure(data=go.Scatter(x=forecast['hour'], y=prediction_reg))
 
-# Generate predictions on the test set
-prediction_app = rfc.predict(unseen)
-print(temp_val[0].text[:-1], hour[0].text, wind[0].text)
-print(prediction_app)
+fig_reg.update_xaxes(title_text="Hours")
+fig_reg.update_yaxes(title_text="dB")
+fig_reg.update_layout(title_text="Noise levels in the Next 48 Hours")
 
-
-'''
 #App
 st.title("Noise forecast")
 
-st.write("The next two days will be:")
-st.write(prediction_app)
+# Create a table with checkboxes for each hour
+st.header("Are there any events on the next two days?")
+selected_hours = st.multiselect('Select hours for the event', hours, default=[])
+# Update the 'Event' column based on the selected hours
+forecast.loc[forecast['hour'].isin(selected_hours), 'Event'] = True
+#Update tag
+for hour in selected_hours:
+    event_type = st.selectbox(f'Select event type for {hour}',['Party', 'Sports', 'Cultural', 'Pub Crawl'])
+    forecast.loc[forecast['hour']==hour, 'tag_category']=event_type
+
+st.header("Noise levels for the next 2 days")
+st.plotly_chart(fig_class)
+st.plotly_chart(fig_reg)
+
 
 with st.sidebar:
     st.header('Calendar')
@@ -142,4 +103,4 @@ d = st.date_input(
 
 st.header('Weather')
 st.dataframe(weather)
-'''
+
