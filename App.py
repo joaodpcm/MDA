@@ -1,16 +1,15 @@
 #importing packages
+%pip install selenium
+%pip install BeautifulSoup4
+
 import streamlit as st
 import pandas as pd
 import datetime
 from selenium import webdriver
 from bs4 import BeautifulSoup
-import numpy as np 
-import seaborn as sns
 import plotly.graph_objects as go
-import missingno as msno
 import matplotlib.pyplot as plt
 import pickle
-import requests
 from datetime import datetime
 from datetime import timedelta
 import sklearn
