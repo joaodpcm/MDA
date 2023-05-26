@@ -1,7 +1,4 @@
 #importing packages
-pip install selenium
-pip install BeautifulSoup4
-
 import streamlit as st
 import pandas as pd
 import datetime
