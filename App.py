@@ -2,7 +2,6 @@
 import streamlit as st
 import pandas as pd
 import datetime
-import matplotlib.pyplot as plt
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import numpy as np 
