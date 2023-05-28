@@ -10,8 +10,15 @@ import pickle
 from datetime import datetime
 from datetime import timedelta
 import sklearn
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.exceptions import NotFittedError
+from sklearn.inspection import permutation_importance
 import requests
-import plotly.graph_objects as go
+import numpy as np
 
 #importing models
 with open('classifier_trained_model.pkl', 'rb') as f:
@@ -19,6 +26,21 @@ with open('classifier_trained_model.pkl', 'rb') as f:
 
 with open('regressor_trained_model.pkl', 'rb') as f:
     hgr = pickle.load(f)
+
+#importing avarage of the noise
+df_hourly_avg=pd.read_csv('noise_data/hourly_acg_noise.csv')
+
+# Retrieve the current date and time
+current_time = datetime.now()
+
+# Create a range of dates and times for the next 48 hours
+time_range = pd.date_range(start=current_time, periods=48, freq='H')
+# Filter the dataset for the next 48 hours
+filtered_data = df_hourly_avg[
+    (df_hourly_avg['DayOfWeek'] == current_time.weekday()) &
+    (df_hourly_avg['HourOfDay'].isin(time_range.hour))
+]
+
 
 
 #loading unseen data
@@ -64,11 +86,16 @@ fig_class.update_layout(title_text="Relative Noise Levels in the Next 48 Hours")
 
 
 #making a graph for the regressor
-fig_reg = go.Figure(data=go.Scatter(x=forecast['hour'], y=prediction_reg))
+fig_reg = go.Figure()
+fig_reg.add_trace(data=go.Scatter(x=forecast['hour'], y=prediction_reg, name='Noise Forecast'))
+fig_reg.add_trace(go.Scatter(x=time_range, y=filtered_data['AverageNoise'], mode='lines', name='Average Noise',line=dict(dash='dash')))
 
 fig_reg.update_xaxes(title_text="Hours")
 fig_reg.update_yaxes(title_text="dB")
-fig_reg.update_layout(title_text="Noise levels in the Next 48 Hours")
+fig_reg.update_layout(title_text="Noise Forecast vs Avarage for the next 48 hours")
+
+
+
 
 #App
 st.title("Noise forecast")
