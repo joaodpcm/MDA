@@ -21,8 +21,21 @@ import requests
 import numpy as np
 
 #importing models
+
+url_class = 'https://raw.githubusercontent.com/username/repository/main/regressor_trained_model.pkl'
+response_class = requests.get(url_class)
+
+url_reg= 
+response_reg= requests.get(url_reg)
+
+with open('classifier_trained_model.pkl', 'wb') as f:
+    f.write(response_class.content)
+
 with open('classifier_trained_model.pkl', 'rb') as f:
     rfc = pickle.load(f)
+
+with open('regressor_trained_model.pkl','wb') as f:
+    f.write(response_reg.content)
 
 with open('regressor_trained_model.pkl', 'rb') as f:
     hgr = pickle.load(f)
