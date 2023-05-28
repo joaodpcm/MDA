@@ -60,7 +60,7 @@ fig_class = go.Figure(data=[go.Bar(x=forecast['hour'],
                             hovertemplate="Hour: %{x}<br>Noise Level: %{customdata}<extra></extra>")])
 fig_class.update_xaxes(title_text="Hours")
 fig_class.update_yaxes(title_text="Noise Level", categoryorder="array", categoryarray=category_order)
-fig_class.update_layout(title_text="Noise Levels in the Next 48 Hours")
+fig_class.update_layout(title_text="Relative Noise Levels in the Next 48 Hours")
 
 
 #making a graph for the regressor
@@ -85,4 +85,9 @@ for hour in selected_hours:
 
 st.header("Noise levels for the next 2 days")
 st.plotly_chart(fig_class)
+st.markdown("This graph shows a categorical prediction for the noise level for the next 48 hours relative to the usual noise levels on these hours. "
+            '<span style="color:red">The red bars indicate hours that will be louder than usual.</span>'  
+            '<span style="color:yellow">The yellow bars indicate hours that will be like the usual.</span>'
+             '<span style="color:green">The green bars indicate hours that will be calmer than usual.</span>',unsafe_allow_html=True)
 st.plotly_chart(fig_reg)
+st.markdown('This graph shows the absolute levels of noise expected for the next 48 hours in the continuous line, and the avarage of these hours in the dotted line')
