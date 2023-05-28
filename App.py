@@ -73,9 +73,8 @@ fig_reg.update_layout(title_text="Noise levels in the Next 48 Hours")
 st.title("Noise forecast")
 
 # Create a table with checkboxes for each hour
-hours = list(range(48))
 st.header("Are there any events on the next two days?")
-selected_hours = st.multiselect('Select hours for the event', hours, default=[])
+selected_hours = st.multiselect('Select hours for the event', forecast['hour'], default=[])
 # Update the 'Event' column based on the selected hours
 forecast.loc[forecast['hour'].isin(selected_hours), 'Event'] = True
 #Update tag
