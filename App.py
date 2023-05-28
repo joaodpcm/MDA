@@ -10,6 +10,7 @@ import pickle
 from datetime import datetime
 from datetime import timedelta
 import sklearn
+import requests
 import plotly.graph_objects as go
 
 #importing models
