@@ -9,23 +9,14 @@ import matplotlib.pyplot as plt
 import pickle
 from datetime import datetime
 from datetime import timedelta
-import sklearn
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.exceptions import NotFittedError
-from sklearn.inspection import permutation_importance
 import requests
 import numpy as np
 
 #importing models
-
-url_class = 'https://raw.githubusercontent.com/username/repository/main/regressor_trained_model.pkl'
+url_class = 'https://raw.githubusercontent.com/joaodpcm/MDA/main/classifier_trained_model.pkl'
 response_class = requests.get(url_class)
 
-url_reg= 
+url_reg= 'https://raw.githubusercontent.com/joaodpcm/MDA/main/Regressor_trained_model.pkl'
 response_reg= requests.get(url_reg)
 
 with open('classifier_trained_model.pkl', 'wb') as f:
@@ -34,11 +25,13 @@ with open('classifier_trained_model.pkl', 'wb') as f:
 with open('classifier_trained_model.pkl', 'rb') as f:
     rfc = pickle.load(f)
 
-with open('regressor_trained_model.pkl','wb') as f:
+with open('Regressor_trained_model.pkl','wb') as f:
     f.write(response_reg.content)
 
-with open('regressor_trained_model.pkl', 'rb') as f:
+with open('Regressor_trained_model.pkl', 'rb') as f:
     hgr = pickle.load(f)
+
+
 
 #importing avarage of the noise
 df_hourly_avg=pd.read_csv('noise_data/hourly_acg_noise.csv')
@@ -53,6 +46,10 @@ filtered_data = df_hourly_avg[
     (df_hourly_avg['DayOfWeek'] == current_time.weekday()) &
     (df_hourly_avg['HourOfDay'].isin(time_range.hour))
 ]
+
+events=pd.read_csv('shaped_filter_tags_city2_EXAM.csv')
+events['Time'] = pd.to_datetime(events['Time'])
+events_48 = events[events['Time'].isin(time_range)]
 
 
 
@@ -77,6 +74,7 @@ forecast['nameday'] = weekday
 forecast['hour'] = hour_of_day
 forecast['event_yes'] = False # This value has to be included by the user. So edit this. The value now is missing, but the model running, so even if nothing is provided, it will run
 forecast['tag_category'] = 'No event' # This value has to be included by the user. So edit this
+forecast['# of events'] = events_48['Events']
 
 
 
