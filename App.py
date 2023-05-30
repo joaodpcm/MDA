@@ -13,12 +13,12 @@ import requests
 import numpy as np
 
 #importing models
-url_class = 'https://raw.githubusercontent.com/joaodpcm/MDA/main/classifier_trained_model.pkl'
+url_class = 'https://raw.githubusercontent.com/joaodpcm/MDA/main/classifier.pkl'
 response_class = requests.get(url_class)
 class_content = response_class.content
 rfc = pickle.loads(class_content)
 
-url_reg= 'https://raw.githubusercontent.com/joaodpcm/MDA/main/Regressor_trained_model.pkl'
+url_reg= 'https://raw.githubusercontent.com/joaodpcm/MDA/main/regressor.pkl'
 response_reg= requests.get(url_reg)
 reg_content = response_reg.content
 hgr = pickle.loads(reg_content)
