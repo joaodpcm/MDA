@@ -21,6 +21,7 @@ import requests
 import numpy as np
 import itertools as it
 from plotly.subplots import make_subplots
+import base64
 
 print(sklearn.__version__)
 
