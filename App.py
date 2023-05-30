@@ -23,16 +23,16 @@ response_reg= requests.get(url_reg)
 # reg_content = response_reg.content
 # hgr = pickle.loads(reg_content)
 
-with open('classifier_trained_model.pkl', 'wb') as f:
+with open('classifier.pkl', 'wb') as f:
     f.write(response_class.content)
 
-with open('classifier_trained_model.pkl', 'rb') as f:
+with open('classifier.pkl', 'rb') as f:
     rfc = pickle.load(f)
 
-with open('Regressor_trained_model.pkl','wb') as f:
+with open('regressor.pkl','wb') as f:
     f.write(response_reg.content)
 
-with open('Regressor_trained_model.pkl', 'rb') as f:
+with open('regressor.pkl', 'rb') as f:
     hgr = pickle.load(f)
 
 
