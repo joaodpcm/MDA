@@ -11,15 +11,34 @@ from datetime import datetime
 from datetime import timedelta
 import requests
 import numpy as np
+import base64
 
 #importing models
-url_class = 'https://raw.githubusercontent.com/joaodpcm/MDA/master/classifier.pkl'
+url_class = 'https://api.github.com/repos/joaodpcm/MDA/contents/classifier.pkl'
 response_class = requests.get(url_class)
-rfc = pickle.load(open('classifier.pkl','rb'))
+data_class = response_class.json()
+content_class = data_class['content']
+decoded_content_class = base64.b64decode(content_class)
 
-url_reg= 'https://raw.githubusercontent.com/joaodpcm/MDA/master/regressor.pkl'
-response_reg= requests.get(url_reg)
-hgr = pickle.load(open('regressor.pkl','rb'))
+rfc = pickle.loads(decoded_content_class)
+
+url_reg = 'https://api.github.com/repos/joaodpcm/MDA/contents/regressor.pkl'
+response_reg = requests.get(url_reg)
+data_reg = response_reg.json()
+content_reg = data_reg['content']
+decoded_content_reg = base64.b64decode(content_reg)
+
+hgr = pickle.loads(decoded_content_reg)
+
+
+
+# url_class = 'https://raw.githubusercontent.com/joaodpcm/MDA/master/classifier.pkl'
+# response_class = requests.get(url_class)
+# rfc = pickle.load(open('classifier.pkl','rb'))
+
+# url_reg= 'https://raw.githubusercontent.com/joaodpcm/MDA/master/regressor.pkl'
+# response_reg= requests.get(url_reg)
+# hgr = pickle.load(open('regressor.pkl','rb'))
 
 # with open('classifier.pkl', 'wb') as f:
 #     f.write(response_class.content)
