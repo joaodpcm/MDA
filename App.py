@@ -14,6 +14,8 @@ import numpy as np
 import base64
 import sklearn
 
+print(sklearn.__version__)
+
 #importing models
 url_class = 'https://api.github.com/repos/joaodpcm/MDA/contents/classifier.pkl'
 response_class = requests.get(url_class)
