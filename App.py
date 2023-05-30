@@ -12,6 +12,7 @@ from datetime import timedelta
 import requests
 import numpy as np
 import base64
+import sklearn
 
 #importing models
 url_class = 'https://api.github.com/repos/joaodpcm/MDA/contents/classifier.pkl'
