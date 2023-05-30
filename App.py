@@ -15,22 +15,25 @@ import numpy as np
 #importing models
 url_class = 'https://raw.githubusercontent.com/joaodpcm/MDA/main/classifier_trained_model.pkl'
 response_class = requests.get(url_class)
+class_content = response_class.content
+rfc = pickle.loads(class_content)
 
 url_reg= 'https://raw.githubusercontent.com/joaodpcm/MDA/main/Regressor_trained_model.pkl'
 response_reg= requests.get(url_reg)
+reg_content = response_reg.content
+hgr = pickle.loads(reg_content)
 
-with open('classifier_trained_model.pkl', 'wb') as f:
-    f.write(response_class.content)
+# with open('classifier_trained_model.pkl', 'wb') as f:
+#     f.write(response_class.content)
 
-with open('classifier_trained_model.pkl', 'rb') as f:
-    rfc = pickle.load(f)
+# with open('classifier_trained_model.pkl', 'rb') as f:
+#     rfc = pickle.load(f)
 
-with open('Regressor_trained_model.pkl','wb') as f:
-    f.write(response_reg.content)
+# with open('Regressor_trained_model.pkl','wb') as f:
+#     f.write(response_reg.content)
 
-with open('Regressor_trained_model.pkl', 'rb') as f:
-    hgr = pickle.load(f)
-
+# with open('Regressor_trained_model.pkl', 'rb') as f:
+#     hgr = pickle.load(f)
 
 
 #importing avarage of the noise
