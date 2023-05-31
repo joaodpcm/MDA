@@ -134,7 +134,8 @@ forecast['events_count'] = events_48['Events']
 #making prediction on unseen data
 prediction_reg = hgr.predict(forecast)
 
-prediction_class = rfc.predict(forecast)
+prediction_class1 = rfc.predict(forecast)
+prediction_class = [x + 1 for x in prediction_class1]
 
 
 def pairwise(iterable):
@@ -147,7 +148,7 @@ def pairwise(iterable):
 start_time = datetime.now()
 hours_list = [start_time + timedelta(hours=x) for x in range(48)]
 
-colors = {0: "green", 1: "yellow", 2: "red"}
+colors = {1: "green", 2: "yellow", 3: "red"}
 category_order = ["Low", "Intermediate", "High"]
 fig_class = go.Figure(data=[go.Bar(x=hours_list,
                             y=prediction_class,
@@ -234,3 +235,5 @@ st.markdown("This graph shows a categorical prediction for the noise level for t
              '<span style="color:green">The green bars indicate hours that will be calmer than usual.</span>',unsafe_allow_html=True)
 st.plotly_chart(fig_reg)
 st.markdown('This graph shows the absolute levels of noise expected for the next 48 hours in the continuous line, and the avarage of these hours in the dotted line')
+st.plotly_chart(fig_reg_2)
+st.markdown('This shows a comparison between the absolute values and the relative prediction')
