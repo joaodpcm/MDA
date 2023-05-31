@@ -72,7 +72,7 @@ hgr = pickle.loads(decoded_content_reg)
 
 
 #importing avarage of the noise
-url_hourly_avg = 'https://api.github.com/repos/joaodpcm/MDA/contents/avg_hourly_noise.csv'
+url_hourly_avg = 'https://api.github.com/repos/joaodpcm/MDA/contents/hourly_acg_noise.csv'
 
 df_hourly_avg=pd.read_csv(url_hourly_avg)
 
