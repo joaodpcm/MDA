@@ -72,7 +72,9 @@ hgr = pickle.loads(decoded_content_reg)
 
 
 #importing avarage of the noise
-df_hourly_avg=pd.read_csv('noise_data/hourly_acg_noise.csv')
+url_hourly_avg = 'https://api.github.com/repos/joaodpcm/MDA/contents/avg_hourly_noise.csv'
+
+df_hourly_avg=pd.read_csv(url_hourly_avg)
 
 # Retrieve the current date and time
 current_time = datetime.now()
