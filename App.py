@@ -22,6 +22,12 @@ import numpy as np
 import itertools as it
 from plotly.subplots import make_subplots
 import base64
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.model_selection import LeaveOneGroupOut
+
 
 print(sklearn.__version__)
 
