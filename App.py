@@ -220,8 +220,10 @@ with st.sidebar.beta_container('Home'):
     st.title("Netherlands Team")
 
     with st.beta_expander('About the project'):
+        st.header("objective")
 
-    with st.beta_expander(''):
+    with st.beta_expander('Authors'):
+        st.write("")
 
 
 
