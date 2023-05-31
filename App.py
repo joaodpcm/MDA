@@ -79,18 +79,31 @@ df_hourly_avg=pd.read_csv(url_hourly_avg)
 # Retrieve the current date and time
 current_time = datetime.now()
 
-# Create a range of dates and times for the next 48 hours
-time_range = pd.date_range(start=current_time, periods=48, freq='H')
-# Filter the dataset for the next 48 hours
-filtered_data = df_hourly_avg[
-    (df_hourly_avg['DayOfWeek'] == current_time.weekday()) &
-    (df_hourly_avg['HourOfDay'].isin(time_range.hour))
-]
+# # Create a range of dates and times for the next 48 hours
+# time_range = pd.date_range(start=current_time, periods=48, freq='H')
+# # Filter the dataset for the next 48 hours
+# filtered_data = df_hourly_avg[
+#     (df_hourly_avg['DayOfWeek'] == current_time.weekday()) &
+#     (df_hourly_avg['HourOfDay'].isin(time_range.hour))
+# ]
 
-events=pd.read_csv('shaped_filter_tags_city2_EXAM.csv')
+
+# Create a range of dates and times for the next 48 hours
+time_range = [current_time + timedelta(hours=x) for x in range(48)]
+time_range_df = pd.DataFrame()
+time_range_df['time'] = time_range
+time_range_df['avg'] = np.zeros(48)
+for i in range(len(time_range)):
+    time_range_df.loc[i, 'avg'] = df_hourly_avg[
+    (df_hourly_avg['DayOfWeek'] == time_range_df.loc[i, 'time'].dayofweek) &
+    (df_hourly_avg['HourOfDay'] == time_range_df.loc[i, 'time'].hour)
+].AverageNoise.values[0]
+
+#getting data for amount of events
+events_url = 'https://api.github.com/repos/joaodpcm/MDA/contents/shaped_filter_tags_city2_EXAM.csv'
+events=pd.read_csv(events_url)
 events['Time'] = pd.to_datetime(events['Time'])
 events_48 = events[events['Time'].isin(time_range)]
-
 
 
 #loading unseen data
