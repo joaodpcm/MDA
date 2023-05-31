@@ -10,13 +10,13 @@ import pickle
 from datetime import datetime
 from datetime import timedelta
 import sklearn
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.exceptions import NotFittedError
-from sklearn.inspection import permutation_importance
+# from sklearn.compose import ColumnTransformer
+# from sklearn.pipeline import Pipeline
+# from sklearn.preprocessing import StandardScaler, OneHotEncoder
+# from sklearn.ensemble import RandomForestClassifier
+# from sklearn.metrics import accuracy_score
+# from sklearn.exceptions import NotFittedError
+# from sklearn.inspection import permutation_importance
 import requests
 import numpy as np
 import itertools as it
