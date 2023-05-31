@@ -215,25 +215,51 @@ fig_reg_2.update_layout(title_text="Noise Forecast vs Avarage for the next 48 ho
 
 
 #App
-st.title("Noise forecast")
 
-# Create a table with checkboxes for each hour
-st.header("Are there any events on the next two days?")
-selected_hours = st.multiselect('Select hours for the event', forecast['hour'], default=[])
-# Update the 'Event' column based on the selected hours
-forecast.loc[forecast['hour'].isin(selected_hours), 'Event'] = True
-#Update tag
-for hour in selected_hours:
-    event_type = st.selectbox(f'Select event type for {hour}',['Party', 'Sports', 'Cultural', 'Pub Crawl'])
-    forecast.loc[forecast['hour']==hour, 'tag_category']=event_type
+with st.sidebar.beta_container('Home'):
+    st.title("Netherlands Team")
 
-st.header("Noise levels for the next 2 days")
-st.plotly_chart(fig_class)
-st.markdown("This graph shows a categorical prediction for the noise level for the next 48 hours relative to the usual noise levels on these hours. "
-            '<span style="color:red">The red bars indicate hours that will be louder than usual.</span>'  
-            '<span style="color:yellow">The yellow bars indicate hours that will be like the usual.</span>'
-             '<span style="color:green">The green bars indicate hours that will be calmer than usual.</span>',unsafe_allow_html=True)
-st.plotly_chart(fig_reg)
-st.markdown('This graph shows the absolute levels of noise expected for the next 48 hours in the continuous line, and the avarage of these hours in the dotted line')
-st.plotly_chart(fig_reg_2)
-st.markdown('This shows a comparison between the absolute values and the relative prediction')
+    with st.beta_expander('About the project'):
+
+    with st.beta_expander(''):
+
+
+
+with st.sidebar.beta_container('Noise forecast'):
+    st.title('Noise forecast')
+
+    # Create the child tabs within the parent tab
+    with st.beta_expander('Events on the next days?'):
+        # Create a table with checkboxes for each hour
+        st.header("Are there any events on the next two days?")
+        selected_hours = st.multiselect('Select hours for the event', forecast['hour'], default=[])
+        # Update the 'Event' column based on the selected hours
+        forecast.loc[forecast['hour'].isin(selected_hours), 'Event'] = True
+        #Update tag
+        for hour in selected_hours:
+            event_type = st.selectbox(f'Select event type for {hour}',['Party', 'Sports', 'Cultural', 'Pub Crawl'])
+            forecast.loc[forecast['hour']==hour, 'tag_category']=event_type
+
+    with st.beta_expander('Bar plot'):
+        st.write('This is the content of Child Tab 1')
+        st.header("Noise levels for the next 2 days")
+        st.plotly_chart(fig_class)
+        st.markdown(""" This graph shows a categorical prediction for the noise level for the next 48 hours relative to the usual noise levels on these hours. 
+            '<span style="color:red">The red bars indicate hours that will be louder than usual.</span>'
+            '<span style="color:yellow"> The yellow bars indicate hours that will be like the usual.</span>'
+             '<span style="color:green"> The green bars indicate hours that will be calmer than usual.</span>' """,unsafe_allow_html=True)
+
+
+    with st.beta_expander('Noise level with regression model'):
+        st.header('Noise level with regression model')
+        st.plotly_chart(fig_reg)
+        st.markdown('This graph shows the absolute levels of noise expected for the next 48 hours in the continuous line, and the avarage of these hours in the dotted line. The colors in the line show the classification of the classifier model on that hour')
+
+
+    with st.beta_expander('Noise level with regression model and classifier on the background'):
+        st.header('Noise level with regression model and classifier on the background')
+        st.plotly_chart(fig_reg_2)
+        st.markdown('This shows a comparison between the absolute values and the relative prediction')
+
+
+
