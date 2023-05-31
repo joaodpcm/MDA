@@ -216,7 +216,7 @@ fig_reg_2.update_layout(title_text="Noise Forecast vs Avarage for the next 48 ho
 
 #App
 
-with st.sidebar.beta_container('Home'):
+with st.sidebar.beta_container():
     st.title("Netherlands Team")
 
     with st.beta_expander('About the project'):
@@ -227,7 +227,7 @@ with st.sidebar.beta_container('Home'):
 
 
 
-with st.sidebar.beta_container('Noise forecast'):
+with st.sidebar.beta_container():
     st.title('Noise forecast')
 
     # Create the child tabs within the parent tab
