@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import pickle
 from datetime import datetime
 from datetime import timedelta
-import calendar
 import sklearn
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
@@ -106,22 +105,11 @@ for i in range(len(time_range)):
     (df_hourly_avg['HourOfDay'] == time_range_df.loc[i, 'time'].hour)
 ].AverageNoise.values[0]
 
-
 #getting data for amount of events
 events_url = 'https://raw.githubusercontent.com/joaodpcm/MDA/master/shaped_filter_tags_city2_EXAM.csv'
 events=pd.read_csv(events_url,sep='\t')
 events['Time'] = pd.to_datetime(events['Time'])
 events_48 = events[events['Time'].isin(time_range)]
-
-
-# Load future events
-events_location = '/home/dave/Documents/uni/modern_data/project/MDA/data_fetched_filter_tags_city_EXAM.csv'
-df_events_full = pd.read_csv(events_location, sep='\t')
-df_events_full['startTime'] = pd.to_datetime(df_events_full['startTime'])
-df_events_full['startTime'] = [i.replace(second=0, microsecond=0, minute=0, hour=i.hour) for i in df_events_full['startTime']]
-df_events_full.loc[2, 'startTime'] = pd.to_datetime('2023-06-03 07:00:00')
-df_events_full_48 =  df_events_full[df_events_full['startTime'].isin([i for i in time_range_df['time']])].reset_index()
-
 
 #loading unseen data
 content = "https://weather.com/weather/hourbyhour/l/c097b546627cdff2da1e276cb9b2731055718a5e7270d777a92857a9701c7870"
@@ -227,69 +215,9 @@ fig_reg_2.update_yaxes(title_text="dB")
 fig_reg_2.update_layout(title_text="Noise Forecast vs Avarage for the next 48 hours")
 
 
-# Weather plot
-weather_fig = go.Figure()
-
-weather_fig.add_trace(go.Scatter(x=time_range, y=forecast['temp'], mode='lines', name='Temperature',
-    line=dict(color='red', width=3), yaxis='y1'))
-weather_fig.add_trace(go.Scatter(x=time_range, y=forecast['humidity'], mode='lines', name='Humidity',
-    line=dict(color='blue', width=3), yaxis='y2'))
-weather_fig.add_trace(go.Bar(x=time_range, y=forecast['rain'], name='rain [mm]', text=forecast['rain'], textposition='outside',
-                             marker_color='blue', opacity=0.4,  marker_line_color='blue', marker_line_width=5, yaxis='y3'))
-
-
-weather_fig.update_layout(
-    yaxis=dict(
-        title="<b>Temperature [°C]</b>",
-        titlefont=dict(
-            color="red"
-        ),
-        tickfont=dict(
-            color="red"
-        )
-    ),
-    
-    yaxis2=dict(
-        title="<b>Humidity [%]</b>",
-        titlefont=dict(
-            color="blue"
-        ),
-        tickfont=dict(
-            color="blue"
-        ),
-        overlaying="y", # specifyinfg y - axis has to be separated
-        side="right", # specifying the side the axis should be present
-    ),
-
-    yaxis3=dict(
-        title="yaxis 3",
-        titlefont=dict(
-            color="#006400"
-        ),
-        tickfont=dict(
-            color="#006400"
-        ),
-        anchor="x",  # specifying x - axis has to be the fixed
-        overlaying="y", # specifyinfg y - axis has to be separated
-        side="right", # specifying the side the axis should be present
-        range=[0, 50],
-        visible=False
-    ),
-
-)
-
-
 
 
 #App
-
-st.markdown("""
-<style>
-.big-font {
-    font-size:25px !important;
-}
-</style>
-""", unsafe_allow_html=True)
 
 with st.sidebar.container():
     st.title("Netherlands Team")
@@ -304,6 +232,18 @@ with st.sidebar.container():
 
 st.title('Noise forecast')
 
+# Create the child tabs within the parent tab
+with st.expander('Events on the next days?'):
+    # Create a table with checkboxes for each hour
+    st.header("Are there any events on the next two days?")
+    selected_hours = st.multiselect('Select hours for the event', time_range_df['time'], default=[])
+    # Update the 'Event' column based on the selected hours
+    forecast.loc[forecast['hour'].isin(selected_hours), 'Event'] = True
+    #Update tag
+    for hour in selected_hours:
+        event_type = st.selectbox(f'Select event type for {hour}',['Party', 'Sports', 'Cultural', 'Pub Crawl'])
+        forecast.loc[forecast['hour']==hour, 'tag_category']=event_type
+
 with st.expander('Bar plot'):
     st.write('This is the content of Child Tab 1')
     st.header("Noise levels for the next 2 days")
@@ -313,63 +253,17 @@ with st.expander('Bar plot'):
         '<span style="color:yellow"> The yellow bars indicate hours that will be like the usual.</span>'
          '<span style="color:green"> The green bars indicate hours that will be calmer than usual.</span>' """,unsafe_allow_html=True)
 
-st.header('Noise level with regression model')
-st.plotly_chart(fig_reg)
-st.markdown('This graph shows the absolute levels of noise expected for the next 48 hours in the continuous line, and the avarage of these hours in the dotted line. The colors in the line show the classification of the classifier model on that hour')
 
-
-
-st.markdown('<p class="big-font">We have found the following events in the next 48 hours:</p>', unsafe_allow_html=True)
-for i in range(len(df_events_full_48)):
-    st.write('- ', df_events_full_48.loc[i, 'title'], ', on ', 
-        calendar.month_name[df_events_full_48.loc[i, 'startTime'].month], str(df_events_full_48.loc[i, 'startTime'].day), 
-        ' at ', str(df_events_full_48.loc[i, 'startTime'].strftime("%I:%M %p")),
-        ' (link: ', df_events_full_48.loc[i, 'url'], ')')
-
-
-
-# st.write('We have found the following events in the next 48 hours:')
-# Create the child tabs within the parent tab
-with st.expander('Do you know about any other event?'):
-    # Create a table with checkboxes for each hour
-    # st.header("Are there any events on the next two days?")
-    selected_hours = st.multiselect('Select hours for the event', time_range_df['time'].dt.strftime("%B %d,  %I:%M %p"), default=[])
-    # Update the 'Event' column based on the selected hours
-    forecast.loc[forecast['hour'].isin(selected_hours), 'Event'] = True
-    #Update tag
-    for hour in selected_hours:
-        event_type = st.selectbox(f'Select event type for {hour}',['Party', 'Sports', 'Cultural', 'Pub Crawl'])
-        forecast.loc[forecast['hour']==hour, 'tag_category']=event_type
-
+with st.expander('Noise level with regression model'):
+    st.header('Noise level with regression model')
+    st.plotly_chart(fig_reg)
+    st.markdown('This graph shows the absolute levels of noise expected for the next 48 hours in the continuous line, and the avarage of these hours in the dotted line. The colors in the line show the classification of the classifier model on that hour')
 
 
 with st.expander('Noise level with regression model and classifier on the background'):
     st.header('Noise level with regression model and classifier on the background')
     st.plotly_chart(fig_reg_2)
     st.markdown('This shows a comparison between the absolute values and the relative prediction')
-
-st.markdown('<p class="big-font">The weather will be like:</p>', unsafe_allow_html=True)
-st.plotly_chart(weather_fig)
-
-
-def add_bg_from_local(image_file):
-    with open(image_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
-    st.markdown(
-    f"""
-    <style>
-    .stApp {{
-        background-image: url(data:image/{"png"};base64,{encoded_string.decode()});
-        background-size: 100%;
-        background-position: relative;
-        background-opacity: 0.01;
-        background-color: rgba(0,0,0,0.25);
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True
-    )
-add_bg_from_local('background_lowOp_blur.jpg')  
 
 
 
