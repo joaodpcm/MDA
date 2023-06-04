@@ -124,7 +124,7 @@ events['Time'] = pd.to_datetime(events['Time'])
 events_48 = events[events['Time'].isin(time_range)]
 
 # Load future events
-events_location = '/home/dave/Documents/uni/modern_data/project/MDA/data_fetched_filter_tags_city_EXAM.csv'
+events_location = 'https://raw.githubusercontent.com/joaodpcm/MDA/master/data_fetched_filter_tags_city_EXAM.csv'
 df_events_full = pd.read_csv(events_location, sep='\t')
 df_events_full['startTime'] = pd.to_datetime(df_events_full['startTime'])
 df_events_full['startTime'] = [i.replace(second=0, microsecond=0, minute=0, hour=i.hour) for i in df_events_full['startTime']]
