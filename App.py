@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import pickle
 from datetime import datetime
 from datetime import timedelta
-import calendar
 import sklearn
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
@@ -53,7 +52,6 @@ from sklearn.experimental import enable_hist_gradient_boosting
 
 
 
-
 #App
 
 st.markdown("""
@@ -82,6 +80,7 @@ st.title('Noise forecast for the next two days')
 
 
 
+
 #importing models
 
 
@@ -92,6 +91,7 @@ content_reg = data_reg['content']
 decoded_content_reg = base64.b64decode(content_reg)
 
 hgr = pickle.loads(decoded_content_reg)
+
 
 # # Importing models locally
 # hgr = pickle.load(open('regressor.pkl', 'rb'))
@@ -123,6 +123,15 @@ def initialise_forecast(_temp_val, time_range):
 
 #importing avarage of the noise
 url_hourly_avg = 'https://raw.githubusercontent.com/joaodpcm/MDA/master/hourly_avg_noise.csv'
+
+
+
+
+
+#importing avarage of the noise
+
+url_hourly_avg = 'https://raw.githubusercontent.com/joaodpcm/MDA/master/avg_hourly_noise.csv'
+
 df_hourly_avg=pd.read_csv(url_hourly_avg)
 
 # Retrieve the current date and time
@@ -133,11 +142,19 @@ content = "https://weather.com/weather/hourbyhour/l/c097b546627cdff2da1e276cb9b2
 response = requests.get(content)
 soup = BeautifulSoup(response.content, 'html.parser')
 temp_val = soup.findAll('div', attrs={'class':'DetailsTable--field--CPpc_'})
+# # Create a range of dates and times for the next 48 hours
+# time_range = pd.date_range(start=current_time, periods=48, freq='H')
+# # Filter the dataset for the next 48 hours
+# filtered_data = df_hourly_avg[
+#     (df_hourly_avg['DayOfWeek'] == current_time.weekday()) &
+#     (df_hourly_avg['HourOfDay'].isin(time_range.hour))
+# ]
+
 
 # Create a range of dates and times for the next 48 hours
 time_range = [current_time + timedelta(hours=x) for x in range(48)]
 time_range_df = pd.DataFrame()
-time_range_df['time'] = [i.replace(second=0, microsecond=0, minute=0, hour=i.hour) for i in time_range]
+time_range_df['time'] = time_range
 time_range_df['avg'] = np.zeros(48)
 time_range_df['std'] = np.zeros(48)
 for i in range(len(time_range)):
@@ -155,6 +172,7 @@ for i in range(len(time_range)):
 events_url = 'https://raw.githubusercontent.com/joaodpcm/MDA/master/shaped_filter_tags_city2_EXAM.csv'
 events=pd.read_csv(events_url,sep='\t')
 events['Time'] = pd.to_datetime(events['Time'])
+
 events_48 = events[events['Time'].isin(time_range_df['time'])]
 
 # Load future events
@@ -197,6 +215,31 @@ with st.expander('Do you know about any other event?'):
 
 
 
+
+events_48 = events[events['Time'].isin(time_range)]
+
+#loading unseen data
+content = "https://weather.com/weather/hourbyhour/l/c097b546627cdff2da1e276cb9b2731055718a5e7270d777a92857a9701c7870"
+response = requests.get(content)
+soup = BeautifulSoup(response.content, 'html.parser')
+
+temp_val = soup.findAll('div', attrs={'class':'DetailsTable--field--CPpc_'})
+
+
+forecast = pd.DataFrame()
+forecast['temp'] = [round((int(temp_val[i].text[-3:-1])-32 ) *5/9, 1) for i in list(np.array(range(288))) if i%6 == 0]
+forecast['wind'] = [float(temp_val[i].text.split(' ')[1]) for i in list(np.array(range(288))) if i%6 == 1]
+forecast['wind_direction'] = [temp_val[i].text.split(' ')[0] for i in list(np.array(range(288))) if i%6 == 1]
+forecast['humidity'] = [int(temp_val[i].text[-3:-1]) for i in list(np.array(range(288))) if i%6 == 2]
+forecast['cloud_cover'] = [int(temp_val[i].text.replace('Cloud Cover', '')[:-1]) for i in list(np.array(range(288))) if i%6 == 4]
+forecast['rain'] = [int(temp_val[i].text.replace('Rain Amount', '').replace(' in', '')) for i in list(np.array(range(288))) if i%6 == 5]
+weekday = [(datetime.now()+timedelta(hours=i)).weekday() for i in range(48)]
+hour_of_day = [(datetime.now()+timedelta(hours=i)).hour for i in range(48)]
+forecast['nameday'] = weekday
+forecast['hour'] = hour_of_day
+forecast['event_yes'] = False # This value has to be included by the user. So edit this. The value now is missing, but the model running, so even if nothing is provided, it will run
+forecast['tag_category'] = 'No event' # This value has to be included by the user. So edit this
+forecast['events_count'] = events_48['Events']
 
 
 #making prediction on unseen data
@@ -262,6 +305,7 @@ fig_reg.update_layout(title_text="Noise Forecast vs Avarage for the next 48 hour
 
 
 
+
 # Weather plot
 weather_fig = go.Figure()
 
@@ -315,6 +359,17 @@ weather_fig.update_layout(
 
 
 
+#App
+
+with st.sidebar.beta_container():
+    st.title("Netherlands Team")
+
+    with st.beta_expander('About the project'):
+        st.header("objective")
+
+    with st.beta_expander('Authors'):
+        st.write("")
+
 st.header('Do you want to know the noise level at a specific time?')
 hours_single = st.selectbox('Select the hour:', time_range_df['time'].dt.strftime("%B %d,  %I:%M %p"))
 index_hour = forecast.loc[forecast['time_nice']==hours_single].index.values[0]
@@ -333,6 +388,7 @@ else:
     st.subheader('It will be as noisy as usual.')
 
 st.markdown("""---""")
+
 
 
 
@@ -365,3 +421,42 @@ def add_bg_from_local(image_file):
     unsafe_allow_html=True
     )
 add_bg_from_local('background_lowOp_blur.jpg')  
+
+with st.sidebar.beta_container():
+    st.title('Noise forecast')
+
+    # Create the child tabs within the parent tab
+    with st.beta_expander('Events on the next days?'):
+        # Create a table with checkboxes for each hour
+        st.header("Are there any events on the next two days?")
+        selected_hours = st.multiselect('Select hours for the event', forecast['hour'], default=[])
+        # Update the 'Event' column based on the selected hours
+        forecast.loc[forecast['hour'].isin(selected_hours), 'Event'] = True
+        #Update tag
+        for hour in selected_hours:
+            event_type = st.selectbox(f'Select event type for {hour}',['Party', 'Sports', 'Cultural', 'Pub Crawl'])
+            forecast.loc[forecast['hour']==hour, 'tag_category']=event_type
+
+    with st.beta_expander('Bar plot'):
+        st.write('This is the content of Child Tab 1')
+        st.header("Noise levels for the next 2 days")
+        st.plotly_chart(fig_class)
+        st.markdown(""" This graph shows a categorical prediction for the noise level for the next 48 hours relative to the usual noise levels on these hours. 
+            '<span style="color:red">The red bars indicate hours that will be louder than usual.</span>'
+            '<span style="color:yellow"> The yellow bars indicate hours that will be like the usual.</span>'
+             '<span style="color:green"> The green bars indicate hours that will be calmer than usual.</span>' """,unsafe_allow_html=True)
+
+
+    with st.beta_expander('Noise level with regression model'):
+        st.header('Noise level with regression model')
+        st.plotly_chart(fig_reg)
+        st.markdown('This graph shows the absolute levels of noise expected for the next 48 hours in the continuous line, and the avarage of these hours in the dotted line. The colors in the line show the classification of the classifier model on that hour')
+
+
+    with st.beta_expander('Noise level with regression model and classifier on the background'):
+        st.header('Noise level with regression model and classifier on the background')
+        st.plotly_chart(fig_reg_2)
+        st.markdown('This shows a comparison between the absolute values and the relative prediction')
+
+
+
