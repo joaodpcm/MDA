@@ -1,0 +1,14 @@
+name: MDA_app
+
+dependencies:
+  - python=3.9
+  - streamlit
+  - pandas
+  - selenium
+  - beautifulsoup4
+  - plotly
+  - matplotlib
+  - scikit-learn==1.0.2
+  - requests
+  - numpy
+  - xgboost
