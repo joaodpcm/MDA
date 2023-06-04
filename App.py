@@ -54,22 +54,22 @@ from sklearn.experimental import enable_hist_gradient_boosting
 
 
 
-# #importing models
-# url_class = 'https://api.github.com/repos/joaodpcm/MDA/contents/classifier.pkl'
-# response_class = requests.get(url_class)
-# data_class = response_class.json()
-# content_class = data_class['content']
-# decoded_content_class = base64.b64decode(content_class)
+#importing models
+url_class = 'https://api.github.com/repos/joaodpcm/MDA/contents/classifier.pkl'
+response_class = requests.get(url_class)
+data_class = response_class.json()
+content_class = data_class['content']
+decoded_content_class = base64.b64decode(content_class)
 
-# rfc = pickle.loads(decoded_content_class)
+rfc = pickle.loads(decoded_content_class)
 
-# url_reg = 'https://api.github.com/repos/joaodpcm/MDA/contents/regressor.pkl'
-# response_reg = requests.get(url_reg)
-# data_reg = response_reg.json()
-# content_reg = data_reg['content']
-# decoded_content_reg = base64.b64decode(content_reg)
+url_reg = 'https://api.github.com/repos/joaodpcm/MDA/contents/regressor.pkl'
+response_reg = requests.get(url_reg)
+data_reg = response_reg.json()
+content_reg = data_reg['content']
+decoded_content_reg = base64.b64decode(content_reg)
 
-# hgr = pickle.loads(decoded_content_reg)
+hgr = pickle.loads(decoded_content_reg)
 
 
 
@@ -142,9 +142,9 @@ temp_val = soup.findAll('div', attrs={'class':'DetailsTable--field--CPpc_'})
 
 forecast = initialise_forecast(temp_val, time_range_df['time'])
 
-# Importing models locally
-rfc = pickle.load(open('classifier.pkl', 'rb'))
-hgr = pickle.load(open('regressor.pkl', 'rb'))
+# # Importing models locally
+# rfc = pickle.load(open('classifier.pkl', 'rb'))
+# hgr = pickle.load(open('regressor.pkl', 'rb'))
 
 #making prediction on unseen data
 prediction_reg = hgr.predict(forecast)
