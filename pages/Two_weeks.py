@@ -65,9 +65,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 with st.sidebar.container():
+    st.markdown("# NoiSense")
 
     with st.expander('About the project'):
-        st.write('-- Name of the application -- aims to predict the noise level in Leuven, in particular in the area around Naamsesrtaat. \
+        st.write('**NoiSense** aims to predict the noise level in Leuven, in particular in the area around Naamsesrtaat, \
+            using a machine learning approach. \
             We designed the application to take factors that influence human behavior (and thus, noise on the street) \
             into account, such as weather and events being organized in Leuven. Based on information scraped from the internet, \
             the application gives an approximation of the expected noise level.')
@@ -79,23 +81,21 @@ with st.sidebar.container():
 
 
 
-st.title('Noise forecast for the next two weeks')
-
 
 
 # #importing models
 
 
-url_reg = 'https://api.github.com/repos/joaodpcm/MDA/contents/regressor.pkl'
-response_reg = requests.get(url_reg)
-data_reg = response_reg.json()
-content_reg = data_reg['content']
-decoded_content_reg = base64.b64decode(content_reg)
+# url_reg = 'https://api.github.com/repos/joaodpcm/MDA/contents/regressor.pkl'
+# response_reg = requests.get(url_reg)
+# data_reg = response_reg.json()
+# content_reg = data_reg['content']
+# decoded_content_reg = base64.b64decode(content_reg)
 
-hgr = pickle.loads(decoded_content_reg)
+# hgr = pickle.loads(decoded_content_reg)
 
 # Importing models locally
-# hgr = pickle.load(open('regressor.pkl', 'rb'))
+hgr = pickle.load(open('regressor.pkl', 'rb'))
 
 
 # @st.cache_data  # Cache the dataframe initialization
@@ -183,16 +183,20 @@ df_events_full.loc[0, 'startTime'] = pd.to_datetime('2023-06-09 07:00:00')
 df_events_full.loc[3, 'startTime'] = pd.to_datetime('2023-06-15 07:00:00')
 df_events_full_48 =  df_events_full[df_events_full['startTime'].isin([i for i in time_range_df['time']])].reset_index()
 
-mean = 0.005   # hourly rain in mm
+median = 0.005   # hourly rain in mm
 def rain_converter(perc, mean):
-    if perc < 30:
+    if perc < 50:
         return 0
+    elif (perc > 50) & (perc < 80):
+        return median * perc/100 * 2.54 
     else:
-        return perc/100*1.3*mean
+        return median * 2.54 
 
 # Initialize the complete forecast dataframe
-forecast = initialise_forecast(temperature, humidity, next13, time_range_df['time'], mean)
+forecast = initialise_forecast(temperature, humidity, next13, time_range_df['time'], median)
 
+
+st.title('Noise forecast for the next two weeks (' + time_range[0].strftime("%B %d") + ' to ' + time_range[-1].strftime("%B %d") + ')') 
 
 
 # Create box in the app for the user to add more events
@@ -217,9 +221,9 @@ with st.expander('Do you know about any other event?'):
     # Update the 'Event' column based on the selected hours
     # forecast.loc[forecast['time_nice'].isin(selected_hours), 'event_yes'] = True
     #Update number
-    for hour in selected_hours:
-        event_number = st.number_input(f'How many events on {hour}?', step=1)
-        forecast.loc[forecast['time_nice']==hour, 'events_count'] = forecast.loc[forecast['time_nice']==hour, 'events_count'] + event_number
+    for hour_event in selected_hours:
+        event_number = st.number_input(f'How many events on {hour_event}?', step=1)
+        forecast.loc[forecast['time_nice']==hour_event, 'events_count'] = forecast.loc[forecast['time_nice']==hour_event, 'events_count'] + event_number
 
 
 #making prediction on unseen data
@@ -256,7 +260,7 @@ for i in range(len(color_list)):
 fig_reg = go.Figure()
 
 # add traces (line segments)
-fig_reg.add_trace(go.Scatter(x=time_range, y=time_range_df['avg'],  mode='lines', name='Average with variation',
+fig_reg.add_trace(go.Scatter(x=time_range, y=time_range_df['avg'],  mode='lines', name='Average and variability',
     line=dict(dash='dash', color='grey', width=3)))
 fig_reg.add_trace(go.Scatter(x=time_range, y=time_range_df['avg']+time_range_df['std'], fill='tozeroy', showlegend=False,
     mode='lines', line=dict(dash='dash', color='grey', width=2)))
@@ -282,9 +286,11 @@ fig_reg.update_layout(title_text="Noise Forecast vs Avarage for the next two wee
 # Weather plot
 weather_fig = go.Figure()
 
-weather_fig.add_trace(go.Scatter(x=time_range, y=temp, mode='lines', name='Temperature',
+time_weather = [first_hour + timedelta(hours=int(x)) for x in hour]
+
+weather_fig.add_trace(go.Scatter(x=time_weather, y=temp, mode='lines', name='Temperature',
     line=dict(color='red', width=2), yaxis='y1', line_shape='spline'))
-weather_fig.add_trace(go.Scatter(x=time_range[1:-1], y=humid[1:-1], mode='lines', name='Humidity',
+weather_fig.add_trace(go.Scatter(x=time_weather[1:-1], y=humid[1:-1], mode='lines', name='Humidity',
     line=dict(color='green', width=2), yaxis='y2', line_shape='spline'))
 weather_fig.add_trace(go.Bar(x=time_range, y=forecast['rain'], name='rain [mm]', text=forecast['rain'], textposition='outside',
                              marker_color='blue', opacity=0.4,  marker_line_color='blue', marker_line_width=5, yaxis='y3'))
@@ -341,9 +347,9 @@ weather_fig.update_layout(
 st.header('Do you want to know the noise level at a specific time?')
 hours_single = st.selectbox('Select the hour:', time_range_df['time'].dt.strftime("%B %d,  %I:%M %p"))
 index_hour = forecast.loc[forecast['time_nice']==hours_single].index.values[0]
-st.subheader(f'The noise level will be: {prediction_reg[index_hour]:.1f} dB.')
+st.subheader(f'The noise level will approximately be: {prediction_reg[index_hour]:.0f} dB.')
 if prediction_reg[index_hour] > (time_range_df.loc[index_hour, 'avg'] + time_range_df.loc[index_hour, 'std']):
-    st.subheader('It will be more noisy than usual.')
+    st.subheader('It should be more noisy than usual.')
 # elif (prediction_reg[index_hour] < (time_range_df.loc[index_hour, 'avg'] + time_range_df.loc[index_hour, 'std'])) & (prediction_reg[index_hour] > (time_range_df.loc[index_hour, 'avg'] + 0.4* time_range_df.loc[index_hour, 'std'])):
 #     st.subheader('It is going to be slightly louder than usual.')
 # elif (prediction_reg[index_hour] < (time_range_df.loc[index_hour, 'avg'] + 0.4 * time_range_df.loc[index_hour, 'std'])) & (prediction_reg[index_hour] > (time_range_df.loc[index_hour, 'avg'] - 0.4* time_range_df.loc[index_hour, 'std'])):
@@ -367,7 +373,7 @@ with st.expander('Do you want to see the noise level for the next two weeks?'):
 with st.expander('Do you want to see the weather for the next two weeks?'):
     st.markdown('<p class="big-font">The weather will be like:</p>', unsafe_allow_html=True)
     st.plotly_chart(weather_fig)
-    st.write('The weather forecast is collected from weather.com')
+    st.write('The weather forecast is collected from [weather.com](https://weather.com/weather/today/l/634d52f963b8ccca994c4294a53a4a7cb955ef138eb388d37ff579af6f9a4eff)')
 
 
 def add_bg_from_local(image_file):
