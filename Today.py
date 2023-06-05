@@ -65,9 +65,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 with st.sidebar.container():
+    st.markdown("# NoiSense")
 
     with st.expander('About the project'):
-        st.write('-- Name of the application -- aims to predict the noise level in Leuven, in particular in the area around Naamsesrtaat. \
+        st.write('**NoiSense** aims to predict the noise level in Leuven, in particular in the area around Naamsesrtaat, \
+            using a machine learning approach. \
             We designed the application to take factors that influence human behavior (and thus, noise on the street) \
             into account, such as weather and events being organized in Leuven. Based on information scraped from the internet, \
             the application gives an approximation of the expected noise level.')
@@ -85,16 +87,16 @@ st.title('Noise forecast for the next two days')
 #importing models
 
 
-url_reg = 'https://api.github.com/repos/joaodpcm/MDA/contents/regressor.pkl'
-response_reg = requests.get(url_reg)
-data_reg = response_reg.json()
-content_reg = data_reg['content']
-decoded_content_reg = base64.b64decode(content_reg)
+# url_reg = 'https://api.github.com/repos/joaodpcm/MDA/contents/regressor.pkl'
+# response_reg = requests.get(url_reg)
+# data_reg = response_reg.json()
+# content_reg = data_reg['content']
+# decoded_content_reg = base64.b64decode(content_reg)
 
-hgr = pickle.loads(decoded_content_reg)
+# hgr = pickle.loads(decoded_content_reg)
 
 # # Importing models locally
-# hgr = pickle.load(open('regressor.pkl', 'rb'))
+hgr = pickle.load(open('regressor.pkl', 'rb'))
 
 
 
@@ -237,7 +239,7 @@ for i in range(len(color_list)):
 fig_reg = go.Figure()
 
 # add traces (line segments)
-fig_reg.add_trace(go.Scatter(x=time_range, y=time_range_df['avg'],  mode='lines', name='Average with variation',
+fig_reg.add_trace(go.Scatter(x=time_range, y=time_range_df['avg'],  mode='lines', name='Average and variability',
     line=dict(dash='dash', color='grey', width=3)))
 fig_reg.add_trace(go.Scatter(x=time_range, y=time_range_df['avg']+time_range_df['std'], fill='tozeroy', showlegend=False,
     mode='lines', line=dict(dash='dash', color='grey', width=2)))
@@ -344,7 +346,7 @@ with st.expander('Do you want to see the noise level for the next two days?'):
 with st.expander('Do you want to see the weather for the next two days?'):
     st.markdown('<p class="big-font">The weather will be like:</p>', unsafe_allow_html=True)
     st.plotly_chart(weather_fig)
-    st.write('The weather forecast is collected from weather.com')
+    st.write('The weather forecast is collected from [weather.com](https://weather.com/weather/today/l/634d52f963b8ccca994c4294a53a4a7cb955ef138eb388d37ff579af6f9a4eff)')
 
 
 def add_bg_from_local(image_file):
