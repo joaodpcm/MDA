@@ -4,24 +4,26 @@
 
 The project aimed to: 
 
-Create an app able to indicate a final user if she will experience a high noise level at any specific time within a range of 48 hours. 
+To create an app able to predict noise levels in Naamsestraat, Leuven (Belgium).  
 
 
 For doing so, several specific stages were accomplished: 
 
-1. Getting the data bla bla bla bla 
-2. Preprocessing data bla bla bla 
+1. Collecting data 
+2. Preprocessing data
 3. Modelling: data analysis 
 4. Performing predictions on realtime data
-5. Developing the app bla bla bla 
-6. Putting the app into good use bla bla 
+5. Developing the app 
+6. Putting the app into good use the model thourgh the app
 
 
-For having access to the app, please clik [here](https://www.aalkjfasflkjfdas.com)
+For having access to the app, please clik [here](https://joaodpcm-mda-app-arfcvd.streamlit.app). The code related to its development can be found [here](App.py)
 
-If you want to explore the used data, please find it in the [data folder](https://www.aalkjfasflkjfafsfasdfadfas.com) 
+For accessing to the model training for the [classifier](classifier_model_training.ipynb). For the regressor you can click [here](regressor_model_training.ipynb). The regressor model was used for the app and it is stored [here](regressor.pkl). 
 
-Contents related to the code can be find in the [code folder](https://www.aalkjfasflkjfafsadfas.com). The folder contains the description and coding for: the preprocessing stage, modelling and the app developing. 
+The requirements text file can be found [here](requirements.txt)
+
+If you want to explore the used final data set, please find it [here](data.csv). 
 
 
 
