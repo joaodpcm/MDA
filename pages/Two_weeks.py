@@ -183,15 +183,17 @@ df_events_full.loc[0, 'startTime'] = pd.to_datetime('2023-06-09 07:00:00')
 df_events_full.loc[3, 'startTime'] = pd.to_datetime('2023-06-15 07:00:00')
 df_events_full_48 =  df_events_full[df_events_full['startTime'].isin([i for i in time_range_df['time']])].reset_index()
 
-mean = 0.005   # hourly rain in mm
+median = 0.005   # hourly rain in mm
 def rain_converter(perc, mean):
-    if perc < 30:
+    if perc < 50:
         return 0
+    elif (perc > 50) & (perc < 80):
+        return median * perc/100 * 2.54 
     else:
-        return perc/100*1.3*mean * 2.54
+        return median * 2.54 
 
 # Initialize the complete forecast dataframe
-forecast = initialise_forecast(temperature, humidity, next13, time_range_df['time'], mean)
+forecast = initialise_forecast(temperature, humidity, next13, time_range_df['time'], median)
 
 
 st.title('Noise forecast for the next two weeks (' + time_range[0].strftime("%B %d") + ' to ' + time_range[-1].strftime("%B %d") + ')') 
