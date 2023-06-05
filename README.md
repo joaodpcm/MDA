@@ -19,11 +19,11 @@ For doing so, several specific stages were accomplished:
 
 For having access to the app, please clik [here](https://joaodpcm-mda-app-arfcvd.streamlit.app). The code related to its development can be found [here](App.py)
 
-For accessing to the model training for the [classifier](classifier_model_training.ipynb). For the regressor you can click [here](regressor_model_training.ipynb). The regressor model was used for the app and it is stored [here](regressor.pkl). 
+Two models were trained for doing predictions about the noise levels: a classifier and a regressor. You can access the code of the model training for the classifier [here](classifier_model_training.ipynb). The model training for the regressor is located [here](regressor_model_training.ipynb). 
 
-The requirements text file can be found [here](requirements.txt)
+The regressor model was used for the app and it is stored [here](regressor.pkl). 
 
-If you want to explore the used final data set, please find it [here](data.csv). 
+The requirements text file can be found [here](requirements.txt) If you want to explore the used final data set, please find it [here](data.csv). 
 
 
 
