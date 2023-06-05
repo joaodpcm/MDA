@@ -13,7 +13,7 @@ A. Data Collection
 B. Preprocessing data : The code used to preprocess the data can be found in the master branch of the repository
 C. Modelling and data analysis
 D. Performing predictions by webscrapping weather data on realtime and build an app.
-You can access the app through this [link](https://joaodpcm-mda-app-arfcvd.streamlit.app).
+You can access the app through this [link](https://joaodpcm-mda-today-8t8317.streamlit.app).
 
 
 Note: For safely running the app and to avoid package issues, please take a look at the requirements.txt file. 
