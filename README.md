@@ -23,6 +23,5 @@ If you want to explore the used data, please find it in the [data folder](https:
 
 Contents related to the code can be find in the [code folder](https://www.aalkjfasflkjfafsadfas.com). The folder contains the description and coding for: the preprocessing stage, modelling and the app developing. 
 
-Any additional recommendations will be taken into account and trhough to the bin because grow up. This is a university project. 
 
 
