@@ -109,7 +109,7 @@ def initialise_forecast(_temp_val, time_range):
     forecast['wind_direction'] = [_temp_val[i].text.split(' ')[0] for i in list(np.array(range(288))) if i%6 == 1]
     forecast['humidity'] = [int(_temp_val[i].text[-3:-1]) for i in list(np.array(range(288))) if i%6 == 2]
     forecast['cloud_cover'] = [int(_temp_val[i].text.replace('Cloud Cover', '')[:-1]) for i in list(np.array(range(288))) if i%6 == 4]
-    forecast['rain'] = [int(_temp_val[i].text.replace('Rain Amount', '').replace(' in', '')) for i in list(np.array(range(288))) if i%6 == 5]
+    forecast['rain'] = [int(_temp_val[i].text.replace('Rain Amount', '').replace(' in', '')) *2.54 for i in list(np.array(range(288))) if i%6 == 5]
     weekday = [(datetime.now()+timedelta(hours=i)).weekday() for i in range(48)]
     hour_of_day = [(datetime.now()+timedelta(hours=i)).hour for i in range(48)]
     forecast['nameday'] = weekday

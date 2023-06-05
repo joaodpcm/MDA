@@ -188,7 +188,7 @@ def rain_converter(perc, mean):
     if perc < 30:
         return 0
     else:
-        return perc/100*1.3*mean
+        return perc/100*1.3*mean * 2.54
 
 # Initialize the complete forecast dataframe
 forecast = initialise_forecast(temperature, humidity, next13, time_range_df['time'], mean)
@@ -290,7 +290,7 @@ weather_fig.add_trace(go.Scatter(x=time_weather, y=temp, mode='lines', name='Tem
     line=dict(color='red', width=2), yaxis='y1', line_shape='spline'))
 weather_fig.add_trace(go.Scatter(x=time_weather[1:-1], y=humid[1:-1], mode='lines', name='Humidity',
     line=dict(color='green', width=2), yaxis='y2', line_shape='spline'))
-weather_fig.add_trace(go.Bar(x=time_weather, y=forecast['rain'], name='rain [mm]', text=forecast['rain'], textposition='outside',
+weather_fig.add_trace(go.Bar(x=time_range, y=forecast['rain'], name='rain [mm]', text=forecast['rain'], textposition='outside',
                              marker_color='blue', opacity=0.4,  marker_line_color='blue', marker_line_width=5, yaxis='y3'))
 
 
