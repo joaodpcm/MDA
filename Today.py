@@ -109,7 +109,7 @@ def initialise_forecast(_temp_val, time_range):
     forecast['wind_direction'] = [_temp_val[i].text.split(' ')[0] for i in list(np.array(range(288))) if i%6 == 1]
     forecast['humidity'] = [int(_temp_val[i].text[-3:-1]) for i in list(np.array(range(288))) if i%6 == 2]
     forecast['cloud_cover'] = [int(_temp_val[i].text.replace('Cloud Cover', '')[:-1]) for i in list(np.array(range(288))) if i%6 == 4]
-    forecast['rain'] = [int(_temp_val[i].text.replace('Rain Amount', '').replace(' in', '')) *2.54 for i in list(np.array(range(288))) if i%6 == 5]
+    forecast['rain'] = [float(_temp_val[i].text.replace('Rain Amount', '').replace(' in', '')) *2.54 for i in list(np.array(range(288))) if i%6 == 5]
     weekday = [(datetime.now()+timedelta(hours=i)).weekday() for i in range(48)]
     hour_of_day = [(datetime.now()+timedelta(hours=i)).hour for i in range(48)]
     forecast['nameday'] = weekday
@@ -135,6 +135,7 @@ content = "https://weather.com/weather/hourbyhour/l/c097b546627cdff2da1e276cb9b2
 response = requests.get(content)
 soup = BeautifulSoup(response.content, 'html.parser')
 temp_val = soup.findAll('div', attrs={'class':'DetailsTable--field--CPpc_'})
+
 
 # Create a range of dates and times for the next 48 hours
 time_range = [current_time + timedelta(hours=x) for x in range(48)]
@@ -271,11 +272,14 @@ weather_fig.add_trace(go.Scatter(x=time_range, y=forecast['temp'], mode='lines',
     line=dict(color='red', width=3), yaxis='y1'))
 weather_fig.add_trace(go.Scatter(x=time_range, y=forecast['humidity'], mode='lines', name='Humidity',
     line=dict(color='green', width=3), yaxis='y2'))
-weather_fig.add_trace(go.Bar(x=time_range, y=forecast['rain'], name='rain [mm]', text=forecast['rain'], textposition='outside',
+weather_fig.add_trace(go.Bar(x=time_range, y=forecast['rain'], name='rain [mm]', text=forecast['rain'], # textposition='outside',
                              marker_color='blue', opacity=0.4,  marker_line_color='blue', marker_line_width=5, yaxis='y3'))
 
 
 weather_fig.update_layout(
+    xaxis=dict(
+        domain=[0, 0.8]
+    ),
     yaxis=dict(
         title="<b>Temperature [°C]</b>",
         titlefont=dict(
@@ -299,18 +303,19 @@ weather_fig.update_layout(
     ),
 
     yaxis3=dict(
-        title="yaxis 3",
+        title="<b>Rain amount [mm]</b>",
         titlefont=dict(
-            color="#006400"
+            color="blue"
         ),
         tickfont=dict(
-            color="#006400"
+            color="blue"
         ),
-        anchor="x",  # specifying x - axis has to be the fixed
+        anchor="free",  # specifying x - axis has to be the fixed
         overlaying="y", # specifyinfg y - axis has to be separated
         side="right", # specifying the side the axis should be present
-        range=[0, 50],
-        visible=False
+        range=[0, 10],
+        position=0.93
+        # visible=False
     ),
 
 )
